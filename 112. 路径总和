@@ -35,3 +35,19 @@ public boolean hasPathSum(TreeNode root, int sum) {
         }
         return hasPathSum(root.left, sum - root.val) || hasPathSum(root.right, sum - root.val);
     }
+    
+解法2
+public boolean hasPathSum(TreeNode root, int sum) {
+        return doSum(root, 0, sum);
+    }
+
+    public boolean doSum(TreeNode root, int sum, int targetSum) {
+        if (root == null) {
+            return false;
+        }
+        sum += root.val;
+        if (root.left == null && root.right == null && sum == targetSum) {
+            return  true;
+        }
+        return doSum(root.left, sum, targetSum) || doSum(root.right, sum, targetSum);
+    }
