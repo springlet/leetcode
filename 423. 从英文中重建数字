@@ -1,0 +1,106 @@
+给定一个非空字符串，其中包含字母顺序打乱的英文单词表示的数字0-9。按升序输出原始的数字。
+
+注意:
+
+输入只包含小写英文字母。
+输入保证合法并可以转换为原始的数字，这意味着像 "abc" 或 "zerone" 的输入是不允许的。
+输入字符串的长度小于 50,000。
+示例 1:
+
+输入: "owoztneoer"
+
+输出: "012" (zeroonetwo)
+示例 2:
+
+输入: "fviefuro"
+
+输出: "45" (fourfive)
+
+解法一：按照数字对应的英文单词，依次遍历字符串，如果出现此数字，则计数+1，然后字符串移除此数字。依次遍历数字0-1，直到字符串为空。则输出结果
+public void test() {
+        String input = "zeroonetwothreefourfivesixseveneightnine";
+        int[] res = new int[10];
+        Map<String, Integer> map = new TreeMap<>();
+        map.put("zero", 0);
+        map.put("one", 1);
+        map.put("two", 2);
+        map.put("three", 3);
+        map.put("four", 4);
+        map.put("five", 5);
+        map.put("six", 6);
+        map.put("seven", 7);
+        map.put("eight", 8);
+        map.put("nine", 9);
+        while (input.length() != 0) {
+            for (String numS : map.keySet()) {
+                if (input.length() == 0) {
+                    break;
+                }
+                boolean s = true;
+                for (char c : numS.toCharArray()) {
+                    if (!input.contains(""+c)) {
+                        s = false;
+                        break;
+                    }
+                }
+                if (s) {
+                    res[map.get(numS)] += 1;
+                    for (char x : numS.toCharArray()) {
+                        input = input.replaceFirst(""+x, "");
+                    }
+                }
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i=0;i<res.length;i++) {
+            for (int ii=0;ii<res[i]; ii++) {
+                sb.append(""+i);
+            }
+        }
+
+        System.out.println(sb.toString());
+    }
+    
+    解法二：
+    这道题给了我们一串英文字符串，是由表示数字的英文单词组成的，不过字符顺序是打乱的，让我们重建出数字。
+    那么这道题的思路是先要统计出各个字符出现的次数，然后算出每个单词出现的次数，然后就可以重建了。
+    由于题目中限定了输入的字符串一定是有效的，那么不会出现无法成功重建的情况，这里需要用个trick。
+    我们仔细观察这些表示数字的单词"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"，
+    我们可以发现有些的单词的字符是独一无二的，比如z，只出现在zero中，
+    还有w，u，x，g这四个单词，分别只出现在two，four，six，eight中，
+    那么这五个数字的个数就可以被确定了，由于含有o的单词有zero，two，four，one，其中前三个都被确定了，
+    那么one的个数也就知道了；由于含有h的单词有eight，three，其中eight个数已知，那么three的个数就知道了；
+    由于含有f的单词有four，five，其中four个数已知，那么five的个数就知道了；由于含有s的单词有six，seven，
+    其中six个数已知，那么seven的个数就知道了；由于含有i的单词有six，eight，five，nine，其中前三个都被确定了
+    ，那么nine的个数就知道了，知道了这些问题就变的容易多了，
+    我们按这个顺序"zero", "two", "four", "six", "eight", "one", "three", "five", "seven", "nine"就能找出所有的个数了，参见代码如下：
+    
+    public String originalDigits(String input) {
+        Map<String, Integer> sMap = new HashMap<>();
+        int[] nums = new int[10];
+        for (char c : input.toCharArray()) {
+            if (sMap.containsKey(""+c)) {
+                sMap.put(""+c, sMap.get(""+c) + 1);
+            } else {
+                sMap.put(""+c, 1);
+            }
+        }
+        nums[0] = sMap.get("z")==null?0:sMap.get("z");
+        nums[2] = sMap.get("w")==null?0:sMap.get("w");
+        nums[4] = sMap.get("u")==null?0:sMap.get("u");
+        nums[6] = sMap.get("x")==null?0:sMap.get("x");
+        nums[8] = sMap.get("g")==null?0:sMap.get("g");
+        nums[1] = sMap.get("o")==null?0:sMap.get("o") - nums[0] - nums[2] - nums[4];
+        nums[3] = sMap.get("h")==null?0:sMap.get("h") - nums[8];
+        nums[5] = sMap.get("f")==null?0:sMap.get("f") - nums[4];
+        nums[7] = sMap.get("s")==null?0:sMap.get("s") - nums[6];
+        nums[9] = sMap.get("i")==null?0:sMap.get("i") - nums[6] - nums[8] - nums[5];
+        StringBuilder sb = new StringBuilder();
+        for (int i=0;i<nums.length;i++) {
+            for (int ii=0;ii<nums[i]; ii++) {
+                sb.append(""+i);
+            }
+        }
+        return sb.toString();
+    }
